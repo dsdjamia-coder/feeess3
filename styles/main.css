@@ -245,7 +245,9 @@ body.collection-shell .fee-item-new-green {
     color: #ffffff !important;
 }
 
-#side-drawer { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+#side-drawer { 
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+}
 .drawer-link.active { background-color: #eff6ff; color: #2563eb; font-weight: 600; border-right: 4px solid #2563eb; }
 .drawer-link { color: #4b5563; }
 .drawer-link:hover { background-color: #f1f5f9; }
@@ -258,6 +260,85 @@ body.collection-shell .fee-item-new-green {
 .drawer-link-result:hover {
     background-color: #dbeafe;
     color: #1e40af;
+}
+
+/* ========================================================
+   ADMIN RESPONSIVE EXPANDABLE / COLLAPSIBLE SIDEBAR
+   ======================================================== */
+@media (min-width: 1024px) {
+    #admin-app.has-desktop-sidebar #side-drawer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        transform: translateX(0) !important;
+        z-index: 40;
+    }
+    #admin-app.has-desktop-sidebar #drawer-overlay {
+        display: none !important;
+    }
+    
+    /* Expanded State (Default) */
+    #admin-app.has-desktop-sidebar:not(.sidebar-collapsed) #side-drawer {
+        width: 16rem; /* 256px */
+    }
+    #admin-app.has-desktop-sidebar:not(.sidebar-collapsed) .admin-main-wrapper {
+        margin-left: 16rem;
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #admin-app.has-desktop-sidebar:not(.sidebar-collapsed) .admin-sticky-header {
+        margin-left: 16rem;
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Collapsed State */
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #side-drawer {
+        width: 4.5rem; /* 72px */
+    }
+    #admin-app.has-desktop-sidebar.sidebar-collapsed .admin-main-wrapper {
+        margin-left: 4.5rem;
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #admin-app.has-desktop-sidebar.sidebar-collapsed .admin-sticky-header {
+        margin-left: 4.5rem;
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Hide text & headings when collapsed */
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #side-drawer .nav-text,
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #side-drawer .drawer-heading,
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #side-drawer .drawer-header-title,
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #side-drawer .sidebar-btn-label {
+        display: none !important;
+    }
+
+    /* Header in collapsed sidebar */
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #side-drawer > div:first-child {
+        justify-content: center !important;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Center icons when collapsed */
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #side-drawer .drawer-link {
+        justify-content: center !important;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #side-drawer .drawer-link i {
+        font-size: 1.15rem;
+        margin: 0 auto;
+    }
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #side-drawer .sidebar-footer-btn {
+        justify-content: center !important;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Rotate collapse icon when collapsed */
+    #admin-app.has-desktop-sidebar.sidebar-collapsed #sidebar-toggle-icon {
+        transform: rotate(180deg);
+    }
 }
 
 .worksheet-shell { overflow: hidden; }

@@ -36,55 +36,69 @@
         </div>
     </div>
 
-    <div id="admin-app" class="min-h-screen pb-16">
+    <div id="admin-app" class="min-h-screen pb-16 has-desktop-sidebar">
         
-        <div class="sticky top-0 z-30 card shadow-sm rounded-none border-b border-gray-200 bg-white">
+        <div class="sticky top-0 z-30 card shadow-sm rounded-none border-b border-gray-200 bg-white admin-sticky-header">
             <header class="container mx-auto px-4 py-3 relative flex justify-between items-center h-16">
-                <button id="hamburger-btn" class="p-2 -ml-2 rounded-lg text-gray-600 hover:bg-gray-100 transition focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+                <button id="hamburger-btn" class="p-2 -ml-2 rounded-lg text-gray-600 hover:bg-gray-100 transition focus:outline-none" title="Toggle Sidebar Menu"><i class="fas fa-bars text-xl"></i></button>
                 <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3 w-max">
                     <img id="admin-header-logo" src="assets/images/logo.png" alt="Logo" class="w-8 h-8 rounded-md shadow-sm" onerror="this.style.display='none'">
                     <div class="text-center sm:text-left"><h1 id="app-name-header" class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Admin Dashboard</h1><p id="app-subtitle-header" class="text-[10px] sm:text-xs text-gray-500 font-medium hidden sm:block">Institute Management</p></div>
+                </div>
                 <div class="w-8"></div>
             </header>
         </div>
 
         <div id="drawer-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden opacity-0 transition-opacity duration-300"></div>
-        <aside id="side-drawer" class="fixed top-0 left-0 h-full w-64 bg-white shadow-2xl z-50 transform -translate-x-full flex flex-col">
-            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50"><span class="font-bold text-lg text-gray-800">Main Menu</span><button id="close-drawer-btn" class="text-gray-500 hover:text-gray-800 p-1 rounded-md hover:bg-gray-200"><i class="fas fa-times text-xl"></i></button></div>
+        <aside id="side-drawer" class="fixed top-0 left-0 h-full w-64 bg-white shadow-2xl z-50 transform -translate-x-full lg:translate-x-0 flex flex-col border-r border-gray-200">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 h-16 shrink-0">
+                <div class="drawer-header-title flex items-center gap-2 overflow-hidden">
+                    <i class="fas fa-cubes text-blue-600 text-lg shrink-0"></i>
+                    <span class="font-bold text-base text-gray-800 truncate">Main Menu</span>
+                </div>
+                <button id="sidebar-collapse-btn" class="hidden lg:flex text-gray-500 hover:text-gray-800 p-1.5 rounded-lg hover:bg-gray-200 transition items-center justify-center" title="Collapse / Expand sidebar">
+                    <i id="sidebar-toggle-icon" class="fas fa-chevron-left transition-transform duration-300"></i>
+                </button>
+                <button id="close-drawer-btn" class="lg:hidden text-gray-500 hover:text-gray-800 p-1 rounded-md hover:bg-gray-200"><i class="fas fa-times text-xl"></i></button>
+            </div>
             <nav class="flex-grow pb-4 space-y-1 overflow-y-auto">
                 <div class="drawer-heading">Institution</div>
-                <a href="#dashboard" class="nav-link drawer-link flex items-center gap-3 p-3 transition active"><i class="fas fa-chart-pie w-5 text-center"></i><span class="text-sm">Dashboard</span></a>
-                <a href="#academic-years" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-calendar-alt w-5 text-center"></i><span class="text-sm">Academic Years</span></a>
-                <a href="#manage-staff" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-chalkboard-teacher w-5 text-center"></i><span class="text-sm">Staff Management</span></a>
+                <a href="#dashboard" class="nav-link drawer-link flex items-center gap-3 p-3 transition active" title="Dashboard"><i class="fas fa-chart-pie w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Dashboard</span></a>
+                <a href="#academic-years" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Academic Years"><i class="fas fa-calendar-alt w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Academic Years</span></a>
+                <a href="#manage-staff" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Staff Management"><i class="fas fa-chalkboard-teacher w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Staff Management</span></a>
                 
                 <div class="drawer-heading">Student Management</div>
-                <a href="#add-students" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-user-plus w-5 text-center"></i><span class="text-sm">Add Students</span></a>
-                <a href="#manage-students" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-users-cog w-5 text-center"></i><span class="text-sm">Manage Students</span></a>
-                <a href="#manage-classes" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-chalkboard text-center w-5"></i><span class="text-sm">Classes & Divisions</span></a>
+                <a href="#add-students" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Add Students"><i class="fas fa-user-plus w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Add Students</span></a>
+                <a href="#manage-students" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Manage Students"><i class="fas fa-users-cog w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Manage Students</span></a>
+                <a href="#manage-classes" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Classes & Divisions"><i class="fas fa-chalkboard text-center w-5 shrink-0"></i><span class="text-sm nav-text truncate">Classes & Divisions</span></a>
                 
                 <div class="drawer-heading">Finance</div>
-                <a href="#fee-settings" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-receipt w-5 text-center"></i><span class="text-sm">Fee Settings</span></a>
-                <a href="#manage-groups" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-layer-group w-5 text-center"></i><span class="text-sm">Student Groups</span></a>
-                <a href="#fee-concessions" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-hand-holding-usd w-5 text-center"></i><span class="text-sm">Fee Concessions</span></a>
+                <a href="#fee-settings" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Fee Settings"><i class="fas fa-receipt w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Fee Settings</span></a>
+                <a href="#manage-groups" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Student Groups"><i class="fas fa-layer-group w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Student Groups</span></a>
+                <a href="#fee-concessions" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Fee Concessions"><i class="fas fa-hand-holding-usd w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Fee Concessions</span></a>
 
                 <div class="drawer-heading">Website Management</div>
-                <a href="#web-basic-info" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-globe w-5 text-center"></i><span class="text-sm">Basic Info</span></a>
-                <a href="#web-notices" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-bell w-5 text-center"></i><span class="text-sm">Notifications</span></a>
-                <a href="#web-gallery" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-images w-5 text-center"></i><span class="text-sm">Gallery</span></a>
+                <a href="#web-basic-info" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Basic Info"><i class="fas fa-globe w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Basic Info</span></a>
+                <a href="#web-notices" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Notifications"><i class="fas fa-bell w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Notifications</span></a>
+                <a href="#web-gallery" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Gallery"><i class="fas fa-images w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Gallery</span></a>
 
                 <div class="drawer-heading">System</div>
-                <a href="#security-settings" class="nav-link drawer-link flex items-center gap-3 p-3 transition"><i class="fas fa-shield-alt w-5 text-center"></i><span class="text-sm">Security Settings</span></a>
+                <a href="#security-settings" class="nav-link drawer-link flex items-center gap-3 p-3 transition" title="Security Settings"><i class="fas fa-shield-alt w-5 text-center shrink-0"></i><span class="text-sm nav-text truncate">Security Settings</span></a>
             </nav>
-            <div class="p-4 border-t border-gray-100 bg-gray-50 flex flex-col gap-2">
-                <a href="official.html" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 flex items-center justify-center gap-2 w-full p-2.5 rounded-lg font-bold transition">
-                    <i class="fas fa-th-large text-indigo-600"></i>
-                    <span class="text-sm">ബാക്ക് to ഒഫീഷ്യൽ</span>
+            <div class="p-3 border-t border-gray-100 bg-gray-50 flex flex-col gap-2 shrink-0">
+                <a href="official.html" class="sidebar-footer-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 flex items-center justify-center gap-2 w-full p-2.5 rounded-lg font-bold transition text-xs" title="ബാക്ക് to ഒഫീഷ്യൽ">
+                    <i class="fas fa-th-large text-indigo-600 shrink-0"></i>
+                    <span class="sidebar-btn-label truncate">ബാക്ക് to ഒഫീഷ്യൽ</span>
                 </a>
-                <button id="result-exit-btn" onclick="window.logoutAdmin()" class="btn-danger flex items-center justify-center gap-2 w-full p-2.5 rounded-lg font-bold transition"><i class="fas fa-sign-out-alt"></i><span class="text-sm">അഡ്മിൻ ലോഗൗട്ട്</span></button>
+                <button id="result-exit-btn" onclick="window.logoutAdmin()" class="sidebar-footer-btn btn-danger flex items-center justify-center gap-2 w-full p-2.5 rounded-lg font-bold transition text-xs" title="അഡ്മിൻ ലോഗൗട്ട്">
+                    <i class="fas fa-sign-out-alt shrink-0"></i>
+                    <span class="sidebar-btn-label truncate">അഡ്മിൻ ലോഗൗട്ട്</span>
+                </button>
             </div>
         </aside>
 
-        <main class="container mx-auto p-4 max-w-5xl mt-2">
+        <div class="admin-main-wrapper transition-all duration-300">
+            <main class="container mx-auto p-4 max-w-5xl mt-2">
 
 
 
@@ -213,16 +227,27 @@
             
             <!-- 1. Staff Management -->
             <section id="manage-staff-page" class="page hidden">
-                <div class="card p-5 rounded-xl shadow-sm mb-6 border border-emerald-100 bg-emerald-50/40">
-                    <h2 class="text-xl font-bold mb-4 text-emerald-900 border-b border-emerald-200 pb-2"><i class="fas fa-layer-group mr-2"></i>Staff Categories</h2>
-                    <p class="text-sm text-emerald-700 mb-4">Create categories here. New categories will appear in the Type dropdown below and profiles can be managed from Staff Management.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-3">
-                        <input type="text" id="dir-cat-name" class="p-2.5 border rounded-lg" placeholder="Category Name (e.g. Drivers)">
-                        <input type="number" id="dir-cat-order" class="p-2.5 border rounded-lg w-full md:w-24" min="1" value="1" placeholder="Order">
-                        <label class="inline-flex items-center gap-2 text-sm font-semibold bg-white border rounded-lg px-3"><input type="checkbox" id="dir-cat-public" checked class="w-4 h-4"> Show in Public</label>
-                        <button id="dir-cat-add-btn" class="btn-primary font-bold px-6 py-2.5 rounded-lg">Add Category</button>
+                <!-- Compact Staff Categories -->
+                <div class="card p-3.5 rounded-xl shadow-xs mb-4 border border-emerald-100 bg-emerald-50/40">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-2.5">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-layer-group text-emerald-700 text-sm"></i>
+                            <h2 class="text-sm font-bold text-emerald-900">Staff Categories</h2>
+                        </div>
+                        <span class="text-[11px] text-emerald-700">Add categories here or click edit to customize fields</span>
                     </div>
-                    <div id="dir-categories-list" class="space-y-3 mt-4"></div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="text" id="dir-cat-name" class="p-2 text-xs border rounded-lg flex-1 min-w-[150px] bg-white" placeholder="Category Name (e.g. Drivers)">
+                        <input type="number" id="dir-cat-order" class="p-2 text-xs border rounded-lg w-16 bg-white" min="1" value="1" placeholder="Order">
+                        <label class="inline-flex items-center gap-1.5 text-xs font-semibold bg-white border rounded-lg px-2.5 py-1.5 cursor-pointer">
+                            <input type="checkbox" id="dir-cat-public" checked class="w-3.5 h-3.5 text-emerald-600">
+                            <span>Public</span>
+                        </label>
+                        <button id="dir-cat-add-btn" class="btn-primary font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div id="dir-categories-list" class="flex flex-wrap items-center gap-2 pt-2.5 mt-2.5 border-t border-emerald-200/50"></div>
                 </div>
                 <div class="card p-5 rounded-xl shadow-sm mb-6">
                     <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Add New Staff</h2>
@@ -805,6 +830,7 @@
             </section>
 
         </main>
+        </div>
     </div>
 
     <!-- Modals -->
@@ -913,6 +939,79 @@
             <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
                 <button id="edit-class-cancel" class="px-5 py-2.5 bg-gray-200 text-gray-800 font-bold rounded-lg hover:bg-gray-300">Cancel</button>
                 <button id="edit-class-update" class="btn-primary px-6 py-2.5 rounded-lg font-bold shadow-md">Rename</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Staff Category Popup -->
+    <div id="edit-staff-category-popup" class="fixed inset-0 popup-overlay items-center justify-center hidden px-4 z-50">
+        <div class="card rounded-2xl shadow-2xl p-5 w-full max-w-xl mx-auto bg-white relative max-h-[92vh] flex flex-col">
+            <div class="flex items-center justify-between border-b pb-3 mb-3">
+                <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-layer-group text-emerald-600"></i>
+                    <span>Edit Staff Category & Fields</span>
+                </h3>
+                <button type="button" id="edit-staff-cat-close-btn" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <input type="hidden" id="edit-staff-cat-id">
+            
+            <div class="overflow-y-auto pr-1 space-y-4 flex-1">
+                <!-- 1. Category Details -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Category Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="edit-staff-cat-name" class="w-full p-2 border rounded-lg text-xs bg-white focus:ring-2" placeholder="e.g. Teaching Staff">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Display Order</label>
+                        <input type="number" id="edit-staff-cat-order" min="1" class="w-full p-2 border rounded-lg text-xs bg-white focus:ring-2" value="1">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="inline-flex items-center gap-2 text-xs font-bold text-gray-700 cursor-pointer">
+                            <input type="checkbox" id="edit-staff-cat-public" class="w-4 h-4 text-emerald-600 rounded">
+                            <span>Show in Public Directory</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 2. Select / Unselect Category Input Fields -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-bold uppercase tracking-wider text-gray-700">
+                            <i class="fas fa-list-check mr-1 text-emerald-600"></i> Select Input Fields for this Category
+                        </label>
+                        <span class="text-[11px] text-gray-500">Uncheck to remove a field</span>
+                    </div>
+                    <p class="text-[11px] text-gray-500 mb-2">Check the input fields required for staff members under this category. Uncheck to hide them.</p>
+                    <div id="edit-staff-cat-fields-list" class="space-y-1.5 border rounded-xl p-3 bg-slate-50/50 max-h-56 overflow-y-auto">
+                        <!-- Populated dynamically with checkboxes -->
+                    </div>
+                </div>
+
+                <!-- 3. Add Custom Field to Category -->
+                <div class="border border-dashed border-emerald-300 bg-emerald-50/40 p-3 rounded-xl">
+                    <div class="text-xs font-bold text-emerald-900 mb-1.5 flex items-center gap-1.5">
+                        <i class="fas fa-plus-circle text-emerald-600"></i> Add New Custom Field
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-[2fr_1fr_auto] gap-2 items-center">
+                        <input type="text" id="edit-staff-cat-new-field-label" class="p-2 border rounded-lg text-xs bg-white" placeholder="Field Label (e.g. Qualification)">
+                        <select id="edit-staff-cat-new-field-type" class="p-2 border rounded-lg text-xs bg-white">
+                            <option value="text">Text</option>
+                            <option value="number">Number</option>
+                            <option value="date">Date</option>
+                            <option value="phone">Phone</option>
+                            <option value="textarea">Textarea</option>
+                        </select>
+                        <button type="button" id="edit-staff-cat-add-field-btn" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1 shadow-xs">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t mt-3">
+                <button type="button" id="edit-staff-cat-cancel-btn" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-lg transition">Cancel</button>
+                <button type="button" id="edit-staff-cat-save-btn" class="px-5 py-2 btn-primary text-xs font-bold rounded-lg shadow-sm transition">Save Changes</button>
             </div>
         </div>
     </div>

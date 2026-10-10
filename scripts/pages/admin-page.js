@@ -958,10 +958,11 @@ const syncDrawerForResultManagement = (targetId = '') => {
             link.type = 'button';
             link.className = 'result-drawer-link w-full text-left drawer-link flex items-center gap-3 p-3 transition';
             link.dataset.resultTab = entry.tab;
-            link.innerHTML = `<i class="fas ${entry.icon} w-5 text-center"></i><span class="text-sm">${entry.label}</span>`;
+            link.title = entry.label;
+            link.innerHTML = `<i class="fas ${entry.icon} w-5 text-center shrink-0"></i><span class="text-sm nav-text">${entry.label}</span>`;
             link.addEventListener('click', () => {
                 switchResultTab(entry.tab);
-                toggleDrawer(false);
+                if (!isDesktop()) toggleDrawer(false);
             });
             drawerNav.appendChild(link);
         });
@@ -998,14 +999,60 @@ const updateResultDrawerActiveState = () => {
         link.classList.toggle('border', !isActive);
     });
 };
-const toggleDrawer = (open) => {
-    if (!drawer || !overlay) return;
-    if(open) { overlay.classList.remove('hidden'); setTimeout(()=>overlay.classList.remove('opacity-0'), 10); drawer.classList.remove('-translate-x-full'); }
-    else { overlay.classList.add('opacity-0'); drawer.classList.add('-translate-x-full'); setTimeout(()=>overlay.classList.add('hidden'), 300); }
+
+const isDesktop = () => window.innerWidth >= 1024;
+
+const setSidebarCollapsed = (collapsed) => {
+    const adminApp = document.getElementById('admin-app');
+    if (!adminApp) return;
+    adminApp.classList.toggle('sidebar-collapsed', collapsed);
+    localStorage.setItem('admin_sidebar_collapsed', collapsed ? 'true' : 'false');
 };
-document.getElementById('hamburger-btn')?.addEventListener('click', () => toggleDrawer(true));
+
+const toggleSidebarState = () => {
+    if (isDesktop()) {
+        const adminApp = document.getElementById('admin-app');
+        const isCollapsed = adminApp?.classList.contains('sidebar-collapsed');
+        setSidebarCollapsed(!isCollapsed);
+    } else {
+        toggleDrawer(true);
+    }
+};
+
+const initSidebarState = () => {
+    const stored = localStorage.getItem('admin_sidebar_collapsed');
+    setSidebarCollapsed(stored === 'true');
+};
+
+const toggleDrawer = (open) => {
+    if (isDesktop()) return;
+    if (!drawer || !overlay) return;
+    if (open) {
+        overlay.classList.remove('hidden');
+        setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        drawer.classList.remove('-translate-x-full');
+    } else {
+        overlay.classList.add('opacity-0');
+        drawer.classList.add('-translate-x-full');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+    }
+};
+
+document.getElementById('hamburger-btn')?.addEventListener('click', toggleSidebarState);
+document.getElementById('sidebar-collapse-btn')?.addEventListener('click', () => {
+    const adminApp = document.getElementById('admin-app');
+    const isCollapsed = adminApp?.classList.contains('sidebar-collapsed');
+    setSidebarCollapsed(!isCollapsed);
+});
 document.getElementById('close-drawer-btn')?.addEventListener('click', () => toggleDrawer(false));
 overlay?.addEventListener('click', () => toggleDrawer(false));
+
+initSidebarState();
+window.addEventListener('resize', () => {
+    if (isDesktop() && overlay && !overlay.classList.contains('hidden')) {
+        toggleDrawer(false);
+    }
+});
 
 const activateAdminPage = (targetId, options = {}) => {
     const { suppressDeniedAlert = false, pushHistory = true } = options;
@@ -4173,19 +4220,16 @@ const DIRECTORY_CORE_FIELDS = [
     { id: 'core_phone', label: 'Phone Number', key: 'phone', type: 'phone', required: false, order: 4, locked: true },
     { id: 'core_address', label: 'Address', key: 'address', type: 'textarea', required: false, order: 5, locked: true }
 ];
-const ensureDefaultDirectoryFields = (fields = []) => {
-    const incoming = (Array.isArray(fields) ? fields : []).map(normalizeDirectoryField);
-    const byKey = new Map(incoming.map((field) => [field.key, field]));
-    const merged = DIRECTORY_CORE_FIELDS.map((core) => normalizeDirectoryField({
-        ...core,
-        ...(byKey.get(core.key) || {}),
-        required: core.key === 'name' ? true : Boolean(byKey.get(core.key)?.required || false),
-        locked: true
-    }));
-    incoming.forEach((field) => {
-        if (!DIRECTORY_CORE_FIELDS.some((core) => core.key === field.key)) merged.push(field);
-    });
-    return merged.sort((a, b) => a.order - b.order);
+const ensureDefaultDirectoryFields = (fields = null) => {
+    if (!Array.isArray(fields) || fields.length === 0) {
+        return DIRECTORY_CORE_FIELDS.map(normalizeDirectoryField);
+    }
+    const incoming = fields.map(normalizeDirectoryField);
+    // Ensure core 'name' is always present as base identifier
+    if (!incoming.some((field) => field.key === 'name')) {
+        incoming.unshift(normalizeDirectoryField({ id: 'core_name', label: 'Name', key: 'name', type: 'text', required: true, order: 1, locked: true }));
+    }
+    return incoming.sort((a, b) => a.order - b.order);
 };
 const normalizeDirectoryCategory = (category = {}) => ({
     id: String(category.id || `cat_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`),
@@ -4399,33 +4443,29 @@ const renderDirectoryEntries = () => {
         }).join('')
         : '<p class="text-sm text-gray-500 italic">No entries added for this category.</p>';
 };
+let currentEditingCategoryDraftFields = [];
+
 const renderDirectoryCategories = () => {
     const categories = getDirectoryCategories();
     const list = document.getElementById('dir-categories-list');
     if (!list) return;
     list.innerHTML = categories.length
-        ? categories.map((category) => `<div class="border border-emerald-200 rounded-2xl p-4 bg-white shadow-sm hover:shadow-md transition space-y-3">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <div class="text-xs font-bold uppercase tracking-widest text-emerald-600">Category Profile</div>
-                    <div class="text-[11px] text-gray-500 mt-1">ID: ${escapeHtml(category.id || '--')}</div>
-                </div>
-                <span class="text-[11px] px-2.5 py-1 rounded-full border ${category.showPublic ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'}">${category.showPublic ? 'Public' : 'Hidden'}</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-[2fr_auto_auto] gap-3 items-center">
-                <input type="text" class="p-2 border rounded dir-cat-inline-name" data-id="${category.id}" value="${escapeHtml(category.name)}">
-                <input type="number" min="1" class="p-2 border rounded w-full md:w-24 dir-cat-inline-order" data-id="${category.id}" value="${Number(category.order || 1)}">
-                <label class="inline-flex items-center gap-2 text-sm font-semibold"><input type="checkbox" class="w-4 h-4 dir-cat-inline-public" data-id="${category.id}" ${category.showPublic ? 'checked' : ''}> Public</label>
-            </div>
-            <div class="flex justify-between items-center border-t pt-3">
-                <div class="text-xs font-semibold text-gray-600">${category.fields.length} configured fields</div>
-                <div class="flex flex-wrap gap-2">
-                    <button class="px-3 py-1.5 text-xs rounded-lg bg-blue-50 text-blue-700 border border-blue-200 font-bold dir-cat-inline-save-btn" data-id="${category.id}"><i class="fas fa-save mr-1"></i>Save</button>
-                    <button class="px-3 py-1.5 text-xs rounded-lg bg-red-50 text-red-700 border border-red-200 font-bold dir-cat-delete-btn" data-id="${category.id}"><i class="fas fa-trash mr-1"></i>Delete</button>
+        ? categories.map((category) => `
+            <div class="inline-flex items-center gap-2 bg-white border border-emerald-200 text-emerald-900 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs hover:border-emerald-300 transition">
+                <span class="font-bold truncate max-w-[130px]">${escapeHtml(category.name)}</span>
+                <span class="text-[10px] text-gray-400 font-mono">#${category.order}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded font-normal ${category.showPublic ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500'}">${category.showPublic ? 'Public' : 'Hidden'}</span>
+                <div class="flex items-center gap-1 border-l pl-2 border-emerald-100">
+                    <button type="button" class="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 dir-cat-edit-btn transition" data-id="${category.id}" title="Edit category & input fields">
+                        <i class="fas fa-pencil-alt text-xs pointer-events-none"></i>
+                    </button>
+                    <button type="button" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dir-cat-delete-btn transition" data-id="${category.id}" title="Delete category">
+                        <i class="fas fa-trash-alt text-xs pointer-events-none"></i>
+                    </button>
                 </div>
             </div>
-        </div>`).join('')
-        : '<p class="text-sm text-gray-500 italic">No categories created yet.</p>';
+        `).join('')
+        : '<p class="text-xs text-emerald-700 italic py-1">No categories created yet.</p>';
     renderDirectoryCategoryOptions();
     renderDirectoryFields();
     renderDirectoryEntryForm();
@@ -4436,11 +4476,103 @@ const renderDirectoryCategories = () => {
     renderStaffTypeControls();
     if(!document.getElementById('manage-staff-page')?.classList.contains('hidden')) renderStaffList();
 };
+
+const openEditStaffCategory = (categoryId) => {
+    const categories = getDirectoryCategories();
+    const category = categories.find((c) => c.id === categoryId);
+    if (!category) return;
+    
+    document.getElementById('edit-staff-cat-id').value = category.id;
+    document.getElementById('edit-staff-cat-name').value = category.name || '';
+    document.getElementById('edit-staff-cat-order').value = Number(category.order || 1);
+    document.getElementById('edit-staff-cat-public').checked = category.showPublic !== false;
+
+    // Available baseline fields:
+    const standardFields = [
+        { id: 'core_name', key: 'name', label: 'Full Name', type: 'text', locked: true, order: 1 },
+        { id: 'core_role', key: 'role', label: 'Role / Designation / Subject', type: 'text', locked: false, order: 2 },
+        { id: 'core_photo', key: 'photo', label: 'Staff Photo (Upload & Mobile Camera)', type: 'photo', locked: false, order: 3 },
+        { id: 'core_phone', key: 'phone', label: 'Phone Number', type: 'phone', locked: false, order: 4 },
+        { id: 'core_address', key: 'address', label: 'Permanent Address', type: 'textarea', locked: false, order: 5 },
+        { id: 'core_email', key: 'email', label: 'Login Email (For Cashier Auth)', type: 'email', locked: false, order: 6 }
+    ];
+
+    const activeKeys = new Set((category.fields || []).map((f) => f.key));
+    
+    const allFields = standardFields.map((std) => {
+        const existing = (category.fields || []).find((f) => f.key === std.key);
+        return {
+            ...std,
+            label: existing?.label || std.label,
+            required: std.key === 'name' ? true : Boolean(existing?.required),
+            active: std.key === 'name' ? true : activeKeys.has(std.key)
+        };
+    });
+
+    // Also include any custom fields that already exist on category
+    (category.fields || []).forEach((f) => {
+        if (!standardFields.some((std) => std.key === f.key)) {
+            allFields.push({
+                ...f,
+                active: true,
+                locked: false
+            });
+        }
+    });
+
+    currentEditingCategoryDraftFields = allFields;
+    renderEditStaffCategoryFieldsList();
+
+    const popup = document.getElementById('edit-staff-category-popup');
+    if (popup) {
+        popup.classList.remove('hidden');
+        popup.classList.add('flex');
+    }
+};
+
+const renderEditStaffCategoryFieldsList = () => {
+    const container = document.getElementById('edit-staff-cat-fields-list');
+    if (!container) return;
+    container.innerHTML = currentEditingCategoryDraftFields.map((field, idx) => `
+        <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-gray-200 gap-2">
+            <label class="inline-flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                <input type="checkbox" class="w-4 h-4 text-emerald-600 rounded edit-field-toggle-cb" data-idx="${idx}" ${field.active ? 'checked' : ''} ${field.locked ? 'disabled' : ''}>
+                <div class="min-w-0">
+                    <span class="text-xs font-bold ${field.active ? 'text-gray-800' : 'line-through text-gray-400'}">${escapeHtml(field.label)}</span>
+                    <span class="text-[10px] text-gray-400 ml-1">(${escapeHtml(field.type || 'text')})</span>
+                </div>
+            </label>
+            <div class="flex items-center gap-2 shrink-0">
+                ${field.key !== 'name' ? `
+                    <label class="inline-flex items-center gap-1 text-[11px] text-gray-500 cursor-pointer ${field.active ? '' : 'opacity-40'}">
+                        <input type="checkbox" class="w-3.5 h-3.5 text-blue-600 rounded edit-field-req-cb" data-idx="${idx}" ${field.required ? 'checked' : ''} ${field.active ? '' : 'disabled'}>
+                        <span>Required</span>
+                    </label>
+                ` : '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Core ID</span>'}
+                ${!['name', 'role', 'photo', 'phone', 'address', 'email'].includes(field.key) ? `
+                    <button type="button" class="text-red-500 hover:text-red-700 p-1 edit-field-del-custom-btn" data-idx="${idx}" title="Remove custom field">
+                        <i class="fas fa-trash-alt text-xs pointer-events-none"></i>
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+};
+
+const closeEditStaffCategoryModal = () => {
+    const popup = document.getElementById('edit-staff-category-popup');
+    if (popup) {
+        popup.classList.add('hidden');
+        popup.classList.remove('flex');
+    }
+};
+
 const updateDirectoryCategories = async (categories = []) => {
     webContent.directoryCategories = categories.map(normalizeDirectoryCategory);
     await updateWebContent();
     renderDirectoryCategories();
 };
+
 document.getElementById('dir-cat-add-btn')?.addEventListener('click', async () => {
     if(!requirePermission('website.manage')) return;
     const name = document.getElementById('dir-cat-name')?.value?.trim() || '';
@@ -4452,24 +4584,18 @@ document.getElementById('dir-cat-add-btn')?.addEventListener('click', async () =
     await updateDirectoryCategories(categories);
     document.getElementById('dir-cat-name').value = '';
 });
+
 document.getElementById('dir-categories-list')?.addEventListener('click', async (event) => {
-    const saveBtn = event.target.closest('.dir-cat-inline-save-btn');
+    const editBtn = event.target.closest('.dir-cat-edit-btn');
     const deleteBtn = event.target.closest('.dir-cat-delete-btn');
-    const categories = getDirectoryCategories();
-    if (saveBtn) {
-        const category = categories.find((item) => item.id === saveBtn.dataset.id);
-        if (!category) return;
-        const name = String(document.querySelector(`.dir-cat-inline-name[data-id="${category.id}"]`)?.value || '').trim();
-        const order = Number(document.querySelector(`.dir-cat-inline-order[data-id="${category.id}"]`)?.value || category.order || 1);
-        const showPublic = document.querySelector(`.dir-cat-inline-public[data-id="${category.id}"]`)?.checked !== false;
-        if (!name) return alert('Category name is required.');
-        const next = categories.map((item) => item.id === category.id ? normalizeDirectoryCategory({ ...item, name, order, showPublic }) : item);
-        await updateDirectoryCategories(next);
+    if (editBtn) {
+        openEditStaffCategory(editBtn.dataset.id);
         return;
     }
     if (deleteBtn) {
         if (!confirm('Delete this category and its entries?')) return;
         const targetId = deleteBtn.dataset.id;
+        const categories = getDirectoryCategories();
         const next = categories.filter((item) => item.id !== targetId);
         await updateDirectoryCategories(next);
         const deleteTargets = publicDirectoryEntries.filter((entry) => entry.categoryId === targetId);
@@ -4479,6 +4605,90 @@ document.getElementById('dir-categories-list')?.addEventListener('click', async 
             ...reassignedStaff.map((staffMember) => updateDoc(doc(db, `${BASE_PATH}/staff`, staffMember.id), { type: 'Management' }))
         ]);
     }
+});
+
+// Category Modal Event Handlers
+document.getElementById('edit-staff-cat-close-btn')?.addEventListener('click', closeEditStaffCategoryModal);
+document.getElementById('edit-staff-cat-cancel-btn')?.addEventListener('click', closeEditStaffCategoryModal);
+
+document.getElementById('edit-staff-cat-fields-list')?.addEventListener('change', (event) => {
+    const toggleCb = event.target.closest('.edit-field-toggle-cb');
+    const reqCb = event.target.closest('.edit-field-req-cb');
+    if (toggleCb) {
+        const idx = Number(toggleCb.dataset.idx);
+        if (currentEditingCategoryDraftFields[idx]) {
+            currentEditingCategoryDraftFields[idx].active = toggleCb.checked;
+            renderEditStaffCategoryFieldsList();
+        }
+    }
+    if (reqCb) {
+        const idx = Number(reqCb.dataset.idx);
+        if (currentEditingCategoryDraftFields[idx]) {
+            currentEditingCategoryDraftFields[idx].required = reqCb.checked;
+        }
+    }
+});
+
+document.getElementById('edit-staff-cat-fields-list')?.addEventListener('click', (event) => {
+    const delBtn = event.target.closest('.edit-field-del-custom-btn');
+    if (delBtn) {
+        const idx = Number(delBtn.dataset.idx);
+        if (!confirm('Remove this custom field?')) return;
+        currentEditingCategoryDraftFields.splice(idx, 1);
+        renderEditStaffCategoryFieldsList();
+    }
+});
+
+document.getElementById('edit-staff-cat-add-field-btn')?.addEventListener('click', () => {
+    const label = document.getElementById('edit-staff-cat-new-field-label')?.value?.trim();
+    const type = document.getElementById('edit-staff-cat-new-field-type')?.value || 'text';
+    if (!label) return alert('Enter a field label.');
+    const key = `custom_${label.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 20)}_${Date.now().toString(36).slice(-3)}`;
+    currentEditingCategoryDraftFields.push({
+        id: `field_${Date.now()}`,
+        key,
+        label,
+        type,
+        required: false,
+        active: true,
+        locked: false,
+        order: currentEditingCategoryDraftFields.length + 1
+    });
+    document.getElementById('edit-staff-cat-new-field-label').value = '';
+    renderEditStaffCategoryFieldsList();
+});
+
+document.getElementById('edit-staff-cat-save-btn')?.addEventListener('click', async () => {
+    if (!requirePermission('website.manage')) return;
+    const categoryId = document.getElementById('edit-staff-cat-id')?.value;
+    const name = document.getElementById('edit-staff-cat-name')?.value?.trim();
+    const order = Number(document.getElementById('edit-staff-cat-order')?.value || 1);
+    const showPublic = document.getElementById('edit-staff-cat-public')?.checked !== false;
+    if (!name) return alert('Category name is required.');
+
+    const activeFields = currentEditingCategoryDraftFields
+        .filter((f) => f.active)
+        .map((f, i) => normalizeDirectoryField({
+            id: f.id || `field_${f.key}`,
+            key: f.key,
+            label: f.label,
+            type: f.type,
+            required: f.key === 'name' ? true : Boolean(f.required),
+            order: i + 1,
+            locked: f.key === 'name'
+        }));
+
+    const categories = getDirectoryCategories();
+    const next = categories.map((c) => c.id === categoryId ? {
+        ...c,
+        name,
+        order,
+        showPublic,
+        fields: activeFields
+    } : c);
+
+    await updateDirectoryCategories(next);
+    closeEditStaffCategoryModal();
 });
 document.getElementById('dir-field-category')?.addEventListener('change', () => { renderDirectoryFields(); });
 document.getElementById('dir-entry-category')?.addEventListener('change', () => { renderDirectoryEntryForm(); renderDirectoryEntries(); });
